@@ -6,6 +6,8 @@ use cosmic_text::FontSystem;
 /// Quadrata, is the fallback face and is required.
 pub(super) const CLIENT_FONTS: &[&str] = &[
     "Fonts\\FRIZQT__.TTF",
+    // 中文字体（汉化补丁附带；放在 Friz 之后作为 CJK 回退面）
+    "Fonts\\NotoSansSC.TTF",
     "Fonts\\ARIALN.TTF",
     "Fonts\\MORPHEUS.TTF",
     "Fonts\\SKURRI.TTF",
