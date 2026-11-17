@@ -9,6 +9,7 @@ pub(super) const CLIENT_FONTS: &[&str] = &[
     "Fonts\\ARIALN.TTF",
     "Fonts\\MORPHEUS.TTF",
     "Fonts\\SKURRI.TTF",
+    "Fonts\\NotoSansSC.TTF",
 ];
 
 /// The face's ascender as a fraction of the em, `hhea.asc / (hhea.asc + |hhea.desc|)`, off the raw
