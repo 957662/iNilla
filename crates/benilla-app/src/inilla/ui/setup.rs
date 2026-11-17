@@ -26,7 +26,7 @@ pub(super) fn show(
         if st.complete() {
             ui.label(
                 egui::RichText::new(format!(
-                    "✔ Game data ready — {} archives, {:.1} GB.",
+                    "✔ 游戏数据就绪 —— {} 个档案，{:.1} GB。",
                     st.present.len(),
                     st.total_bytes() as f64 / 1e9
                 ))
@@ -34,23 +34,23 @@ pub(super) fn show(
                 .size(19.0),
             );
             if !st.missing_expected.is_empty() {
-                hint(ui, &format!("Also usually present, but not required: {}.", st.missing_expected.join(", ")));
+                hint(ui, &format!("通常也存在，但非必需：{}。", st.missing_expected.join(", ")));
             }
             if data.needs_restart() {
-                ui.label("iNilla opens the archives when it starts. Close it and open it again to play.");
-                if ui.add(egui::Button::new(egui::RichText::new("Close iNilla now").color(GOLD)).min_size(egui::vec2(200.0, 44.0))).clicked() {
+                ui.label("iNilla 启动时会打开这些档案。请关闭后重新打开以开始游戏。");
+                if ui.add(egui::Button::new(egui::RichText::new("立即关闭 iNilla").color(GOLD)).min_size(egui::vec2(200.0, 44.0))).clicked() {
                     inilla.settings.setup_done = true;
                     restart(inilla);
                 }
                 hint(ui, super::relaunch_hint());
-            } else if ui.button("Continue").clicked() {
+            } else if ui.button("继续").clicked() {
                 inilla.settings.setup_done = true;
                 overlay.panel = Some(Panel::Launcher);
             }
             ui.separator();
         } else {
             ui.label(
-                egui::RichText::new("iNilla needs the game data from your own World of Warcraft 1.12.1 (build 5875) client.")
+                egui::RichText::new("iNilla 需要来自你自己的《魔兽世界》1.12.1（build 5875）客户端的游戏数据。")
                     .size(18.0),
             );
             hint(
@@ -61,7 +61,7 @@ pub(super) fn show(
             );
             if !st.present.is_empty() {
                 ui.label(format!(
-                    "Found {} of the archives so far; missing: {}.",
+                    "已找到 {} 个档案；缺失：{}。",
                     st.present.len(),
                     st.missing_required.join(", ")
                 ));
@@ -86,10 +86,10 @@ pub(super) fn show(
                     p.bytes_total as f64 / 1e9
                 ));
             }
-            if label == "download" && ui.button("Pause").clicked() {
+            if label == "下载" && ui.button("暂停").clicked() {
                 data.pause();
             }
-            hint(ui, "Keep iNilla open and the screen on; a paused or interrupted download resumes where it stopped.");
+            hint(ui, "请保持 iNilla 打开并亮屏；暂停或中断的下载会从断点继续。");
             return;
         }
 
@@ -99,7 +99,7 @@ pub(super) fn show(
 
         // ── 1 · copy it in ──
         ui.add_space(6.0);
-        ui.label(egui::RichText::new("1 · Copy your Data folder into iNilla").strong().color(GOLD));
+        ui.label(egui::RichText::new("1 · 把你的 Data 文件夹复制到 iNilla").strong().color(GOLD));
         ui.label(
             "• From a Mac or PC: connect the iPhone, open Finder (Windows: Apple Devices / iTunes) → \
              your iPhone → Files → iNilla (in LiveContainer: LiveContainer, then the folder \
@@ -111,17 +111,17 @@ pub(super) fn show(
             inilla_platform::paths::files_location()
         ));
         ui.horizontal(|ui| {
-            if ui.add(egui::Button::new("Check for copied data").min_size(egui::vec2(220.0, 44.0))).clicked() {
+            if ui.add(egui::Button::new("检查已复制的数据").min_size(egui::vec2(220.0, 44.0))).clicked() {
                 data.scan_import();
             }
-            if ui.button("Check again after restart").on_hover_text("A folder copied in before launch is imported automatically").clicked() {
+            if ui.button("重启后再次检查").on_hover_text("启动前复制进来的文件夹会自动导入").clicked() {
                 restart(inilla);
             }
         });
 
         // ── 2 · download it ──
         ui.add_space(10.0);
-        ui.label(egui::RichText::new("2 · Download it from your server").strong().color(GOLD));
+        ui.label(egui::RichText::new("2 · 从你的服务器下载").strong().color(GOLD));
         if overlay.data_url.is_empty() {
             // The server's own data URL, or where an iNilla server puts it: port 8099 beside the
             // realm the player already added.
@@ -132,11 +132,11 @@ pub(super) fn show(
                 overlay.data_url = url;
             }
         }
-        row(ui, "Data URL", |ui| {
+        row(ui, "数据地址", |ui| {
             ui.add(egui::TextEdit::singleline(&mut overlay.data_url).hint_text("http://192.168.1.10:8099/").desired_width(360.0));
         });
-        row(ui, "Access token", |ui| {
-            ui.add(egui::TextEdit::singleline(&mut overlay.data_token).password(true).hint_text("if the host needs one").desired_width(360.0));
+        row(ui, "访问令牌", |ui| {
+            ui.add(egui::TextEdit::singleline(&mut overlay.data_token).password(true).hint_text("若服务器需要").desired_width(360.0));
         });
         hint(
             ui,
@@ -147,14 +147,14 @@ pub(super) fn show(
         let url = overlay.data_url.trim().to_string();
         let token = Some(overlay.data_token.clone());
         ui.horizontal(|ui| {
-            if ui.add_enabled(!url.is_empty(), egui::Button::new("Check server").min_size(egui::vec2(160.0, 44.0))).clicked() {
+            if ui.add_enabled(!url.is_empty(), egui::Button::new("检查服务器").min_size(egui::vec2(160.0, 44.0))).clicked() {
                 data.fetch_manifest(url.clone(), token.clone(), data.locale.clone());
             }
             if let Some(m) = &data.manifest {
                 let free = data.free_bytes();
                 let need = m.total_bytes().saturating_sub(data.status.total_bytes());
                 let enough = free.is_none_or(|f| f > need + 200_000_000);
-                let label = if data.status.present.is_empty() { "Download" } else { "Download / resume" };
+                let label = if data.status.present.is_empty() { "下载" } else { "下载 / 续传" };
                 if ui
                     .add_enabled(enough, egui::Button::new(egui::RichText::new(label).color(GOLD)).min_size(egui::vec2(180.0, 44.0)))
                     .clicked()
@@ -164,7 +164,7 @@ pub(super) fn show(
                 if let Some(f) = free {
                     ui.label(format!("{:.1} GB free", f as f64 / 1e9));
                     if !enough {
-                        ui.colored_label(egui::Color32::LIGHT_RED, "not enough space");
+                        ui.colored_label(egui::Color32::LIGHT_RED, "空间不足");
                     }
                 }
             }
@@ -173,7 +173,7 @@ pub(super) fn show(
         // ── the language, when the server has game data in more than one ──
         if let Some(locales) = data.locales.clone() {
             let current = data.locale.clone().unwrap_or_else(|| locales.default.clone());
-            row(ui, "Language", |ui| {
+            row(ui, "语言", |ui| {
                 for l in &locales.locales {
                     let name = inilla_core::addons::locale_name(&l.locale);
                     if ui.selectable_label(l.locale == current, name).clicked() && l.locale != current {
@@ -192,16 +192,16 @@ pub(super) fn show(
         // ── addons ──
         if let Some(addons) = data.addons.clone().filter(|a| !a.addons.is_empty()) {
             ui.add_space(10.0);
-            ui.label(egui::RichText::new("3 · Addons from your server").strong().color(GOLD));
+            ui.label(egui::RichText::new("3 · 来自服务器的插件").strong().color(GOLD));
             let installed = crate::inilla::data::addons_dir()
                 .map(|d| inilla_core::addons::InstalledAddons::load(&d))
                 .unwrap_or_default();
             for a in &addons.addons {
                 let version = a.version.clone().unwrap_or_default();
                 let state = match installed.addons.get(&a.name) {
-                    Some(v) if *v == version => "installed",
-                    Some(_) => "update available",
-                    None => "not installed",
+                    Some(v) if *v == version => "已安装",
+                    Some(_) => "有更新",
+                    None => "未安装",
                 };
                 ui.label(format!(
                     "• {} {} — {:.1} MB, {state}",
@@ -216,7 +216,7 @@ pub(super) fn show(
                  in yourself are never touched.",
             );
             if ui
-                .add(egui::Button::new("Install / update addons").min_size(egui::vec2(220.0, 44.0)))
+                .add(egui::Button::new("安装 / 更新插件").min_size(egui::vec2(220.0, 44.0)))
                 .clicked()
             {
                 data.sync_addons(token.clone());

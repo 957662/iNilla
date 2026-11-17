@@ -25,7 +25,7 @@ pub(crate) struct EditorState {
     view: Option<String>,
     /// The bar sits at the bottom of the screen instead of under the top row.
     bar_at_bottom: bool,
-    /// "Reset all" was tapped once; the next tap resets.
+    /// "重置全部" was tapped once; the next tap resets.
     confirm_reset: bool,
 }
 
@@ -71,7 +71,7 @@ pub(super) fn show(
             let n = inilla.layout.elements.len();
             for i in 0..n {
                 let el = inilla.layout.elements[i].clone();
-                if !el.in_view(&view) && view != "Minimal" {
+                if !el.in_view(&view) && view != "极简" {
                     continue;
                 }
                 let r = el.rect(&screen, scale);
@@ -174,7 +174,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
         .show(ui, |ui| {
             ui.set_width(width - 24.0);
             ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("Edit HUD").strong().color(GOLD));
+                ui.label(egui::RichText::new("编辑 HUD").strong().color(GOLD));
                 egui::ComboBox::from_id_salt("editor-view")
                     .selected_text(format!("View: {view}"))
                     .show_ui(ui, |ui| {
@@ -187,7 +187,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui
                         .add(
-                            egui::Button::new(egui::RichText::new("Done").color(GOLD))
+                            egui::Button::new(egui::RichText::new("完成").color(GOLD))
                                 .min_size(egui::vec2(90.0, 40.0)),
                         )
                         .clicked()
@@ -197,9 +197,9 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                         return;
                     }
                     let reset = if overlay.editor.confirm_reset {
-                        egui::RichText::new("Tap again to reset").color(egui::Color32::LIGHT_RED)
+                        egui::RichText::new("再点一次重置").color(egui::Color32::LIGHT_RED)
                     } else {
-                        egui::RichText::new("Reset all")
+                        egui::RichText::new("重置全部")
                     };
                     if ui.add(big(reset)).clicked() {
                         if overlay.editor.confirm_reset {
@@ -213,9 +213,9 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                         }
                     }
                     let flip = if overlay.editor.bar_at_bottom {
-                        "⬆ Bar up"
+                        "⬆ 上移"
                     } else {
-                        "⬇ Bar down"
+                        "⬇ 下移"
                     };
                     if ui.add(big(flip)).clicked() {
                         overlay.editor.bar_at_bottom = !overlay.editor.bar_at_bottom;
@@ -229,7 +229,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                 .filter(|i| *i < inilla.layout.elements.len())
             else {
                 ui.label(
-                    egui::RichText::new("Tap an element to change it, drag it to move it.")
+                    egui::RichText::new("点击元素进行修改，拖动可移动。")
                         .color(egui::Color32::from_white_alpha(180)),
                 );
                 return;
@@ -246,11 +246,11 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                         el.size = [(el.size[0] + 4.0).min(120.0), (el.size[1] + 4.0).min(120.0)];
                     }
                 }
-                ui.add(egui::Slider::new(&mut el.opacity, 0.2..=1.5).text("opacity"));
-                ui.checkbox(&mut el.visible, "shown");
+                ui.add(egui::Slider::new(&mut el.opacity, 0.2..=1.5).text("不透明度"));
+                ui.checkbox(&mut el.visible, "显示");
                 let in_view = el.views.iter().any(|v| v == view);
                 let mut all = el.views.is_empty();
-                if ui.checkbox(&mut all, "all views").changed() {
+                if ui.checkbox(&mut all, "所有视图").changed() {
                     el.views = if all {
                         Vec::new()
                     } else {
@@ -259,7 +259,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                 }
                 if !all {
                     let mut here = in_view;
-                    if ui.checkbox(&mut here, format!("in {view}")).changed() {
+                    if ui.checkbox(&mut here, format!("在 {view} 中")).changed() {
                         if here {
                             el.views.push(view.to_string());
                         } else {
@@ -271,7 +271,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                     let current = b.clone();
                     let mut pick = current.clone();
                     egui::ComboBox::from_id_salt("editor-binding")
-                        .selected_text(format!("does: {}", current.label()))
+                        .selected_text(format!("功能：{}", current.label()))
                         .height(360.0)
                         .show_ui(ui, |ui| {
                             for c in [
@@ -296,7 +296,7 @@ fn bar(ui: &mut egui::Ui, overlay: &mut Overlay, inilla: &mut Inilla, view: &str
                     ui.add(egui::DragValue::new(slot).range(1..=120).prefix("slot "));
                 }
                 let id = el.id.clone();
-                if ui.add(big("Reset this")).clicked() {
+                if ui.add(big("重置此项")).clicked() {
                     if let Some(d) = default_layout().elements.into_iter().find(|d| d.id == id) {
                         inilla.layout.elements[i] = d;
                     }

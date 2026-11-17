@@ -61,7 +61,7 @@ impl ServerForm {
         }
         p.port = match self.port.trim().parse::<u16>() {
             Ok(v) if v > 0 => v,
-            _ => return Err(vec!["The port must be a number between 1 and 65535.".into()]),
+            _ => return Err(vec!["端口必须是 1 到 65535 之间的数字。".into()]),
         };
         let opt = |s: &str| Some(s.trim().to_string()).filter(|s| !s.is_empty());
         p.realm_override = opt(&self.realm_override);
@@ -113,19 +113,19 @@ pub(super) fn show(
         return;
     }
     if !data.ready_at_boot {
-        ui.colored_label(egui::Color32::YELLOW, "The game data is not installed yet.");
-        if ui.button("Set up game data").clicked() {
+        ui.colored_label(egui::Color32::YELLOW, "游戏数据尚未安装。");
+        if ui.button("设置游戏数据").clicked() {
             overlay.panel = Some(Panel::Setup);
         }
         ui.separator();
     }
     if inilla.launcher.servers.is_empty() {
-        ui.label("Add the server you play on — the address you would put in realmlist.wtf.");
+        ui.label("添加你游玩的服务器 —— 即填在 realmlist.wtf 里的地址。");
         hint(
             ui,
-            "Any 1.12.1 core works (vmangos, cMaNGOS). The server must have Warden turned off.",
+            "任何 1.12.1 服务端都可用（vmangos、cMaNGOS）。服务端需关闭 Warden。",
         );
-        if ui.button("+ Add server").clicked() {
+        if ui.button("+ 添加服务器").clicked() {
             overlay.server_form = Some(ServerForm::new());
         }
         return;
@@ -141,14 +141,14 @@ pub(super) fn show(
     ui.columns(2, |cols| {
         // ── servers ──
         let ui = &mut cols[0];
-        ui.label(egui::RichText::new("Servers").strong());
+        ui.label(egui::RichText::new("服务器").strong());
         egui::ScrollArea::vertical()
             .id_salt("servers")
             .max_height(ui.available_height() - 60.0)
             .show(ui, |ui| {
                 for s in inilla.launcher.servers.clone() {
                     let is_sel = selected.as_deref() == Some(s.id.as_str());
-                    let badge = if s.is_local() { "LAN" } else { "Internet" };
+                    let badge = if s.is_local() { "局域网" } else { "互联网" };
                     let text = format!("{}   {}  ·  {}", s.name, s.realmlist(), badge);
                     if ui
                         .add_sized(
@@ -164,14 +164,14 @@ pub(super) fn show(
                 }
             });
         ui.horizontal(|ui| {
-            if ui.button("+ Add server").clicked() {
+            if ui.button("+ 添加服务器").clicked() {
                 overlay.server_form = Some(ServerForm::new());
             }
             if let Some(s) = selected
                 .as_deref()
                 .and_then(|id| inilla.launcher.server(id))
             {
-                if ui.button("Edit").clicked() {
+                if ui.button("编辑").clicked() {
                     overlay.server_form = Some(ServerForm::from(s));
                 }
             }
@@ -186,18 +186,18 @@ pub(super) fn show(
         else {
             return;
         };
-        ui.label(egui::RichText::new(format!("Accounts on {}", server.name)).strong());
+        ui.label(egui::RichText::new(format!("{} 上的账号", server.name)).strong());
         if let Some(o) = server.realm_override.as_deref().filter(|o| !o.is_empty()) {
             hint(
                 ui,
-                &format!("World server reached at {o} (realm address override)."),
+                &format!("世界服务器地址：{o}（已覆盖 realm 地址）。"),
             );
         }
         let accounts: Vec<Account> = inilla.launcher.accounts_for(&server.id).cloned().collect();
         if accounts.is_empty() {
             hint(
                 ui,
-                "No accounts yet. Add the account name and password you use on this server.",
+                "还没有账号。添加你在这个服务器使用的账号和密码。",
             );
         }
         for a in accounts {
@@ -210,7 +210,7 @@ pub(super) fn show(
                 );
                 if ui
                     .add(
-                        egui::Button::new(egui::RichText::new("▶ Log in").color(GOLD))
+                        egui::Button::new(egui::RichText::new("▶ 登录").color(GOLD))
                             .min_size(egui::vec2(110.0, 40.0)),
                     )
                     .clicked()
@@ -225,7 +225,7 @@ pub(super) fn show(
                         None => overlay.password_prompt = Some((a.id.clone(), String::new())),
                     }
                 }
-                if ui.button("Edit").clicked() {
+                if ui.button("编辑").clicked() {
                     overlay.account_form = Some(AccountForm {
                         editing: Some(a.id.clone()),
                         server: server.id.clone(),
@@ -237,7 +237,7 @@ pub(super) fn show(
                 }
                 if !saved {
                     ui.label(
-                        egui::RichText::new("no saved password")
+                        egui::RichText::new("未保存密码")
                             .small()
                             .color(egui::Color32::GRAY),
                     );
@@ -251,13 +251,13 @@ pub(super) fn show(
                         let r = ui.add(
                             egui::TextEdit::singleline(pass)
                                 .password(true)
-                                .hint_text("Password")
+                                .hint_text("密码")
                                 .desired_width(200.0),
                         );
                         if r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                             go = true;
                         }
-                        if ui.button("Log in").clicked() {
+                        if ui.button("登录").clicked() {
                             go = true;
                         }
                     });
@@ -275,7 +275,7 @@ pub(super) fn show(
         }
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            if ui.button("+ Add account").clicked() {
+            if ui.button("+ 添加账号").clicked() {
                 overlay.account_form = Some(AccountForm {
                     server: server.id.clone(),
                     remember: true,
@@ -283,8 +283,8 @@ pub(super) fn show(
                 });
             }
             if ui
-                .button("Type it in myself")
-                .on_hover_text("Close this and use the login screen")
+                .button("手动输入")
+                .on_hover_text("关闭此页，使用登录界面")
                 .clicked()
             {
                 overlay.panel = None;
@@ -301,35 +301,35 @@ pub(super) fn show(
 fn server_form(ui: &mut egui::Ui, f: &mut ServerForm, inilla: &mut Inilla) -> bool {
     let mut done = false;
     egui::ScrollArea::vertical().show(ui, |ui| {
-        ui.label(egui::RichText::new(if f.editing.is_some() { "Edit server" } else { "Add server" }).strong());
-        row(ui, "Name", |ui| {
-            ui.add(egui::TextEdit::singleline(&mut f.name).hint_text("My vmangos").desired_width(320.0));
+        ui.label(egui::RichText::new(if f.editing.is_some() { "编辑服务器" } else { "添加服务器" }).strong());
+        row(ui, "名称", |ui| {
+            ui.add(egui::TextEdit::singleline(&mut f.name).hint_text("我的 vmangos").desired_width(320.0));
         });
-        row(ui, "Address (realmlist)", |ui| {
-            ui.add(egui::TextEdit::singleline(&mut f.host).hint_text("192.168.1.10 or wow.example.com").desired_width(320.0));
+        row(ui, "地址（realmlist）", |ui| {
+            ui.add(egui::TextEdit::singleline(&mut f.host).hint_text("192.168.1.10 或 wow.example.com").desired_width(320.0));
         });
         let private = is_private_host(&f.host);
         if !f.host.trim().is_empty() {
             hint(
                 ui,
                 if private {
-                    "A local-network address: reachable at home. Add a public address below to play from outside."
+                    "局域网地址：仅在家中可访问。要外网游玩，请在下方填写公网地址。"
                 } else {
-                    "A public address: reachable from anywhere."
+                    "公网地址：任何地方都能访问。"
                 },
             );
         }
-        row(ui, "Auth port", |ui| {
+        row(ui, "认证端口", |ui| {
             ui.add(egui::TextEdit::singleline(&mut f.port).desired_width(90.0));
         });
-        row(ui, "Server software", |ui| {
+        row(ui, "服务端类型", |ui| {
             for c in [Core::Vmangos, Core::Cmangos, Core::Other] {
                 ui.radio_value(&mut f.core, c, c.label());
             }
         });
-        ui.collapsing("Advanced", |ui| {
-            row(ui, "World server host", |ui| {
-                ui.add(egui::TextEdit::singleline(&mut f.realm_override).hint_text("leave empty to use the realm list's").desired_width(320.0));
+        ui.collapsing("高级", |ui| {
+            row(ui, "世界服务器地址", |ui| {
+                ui.add(egui::TextEdit::singleline(&mut f.realm_override).hint_text("留空则使用 realm 列表下发的").desired_width(320.0));
             });
             hint(
                 ui,
@@ -338,12 +338,12 @@ fn server_form(ui: &mut egui::Ui, f: &mut ServerForm, inilla: &mut Inilla) -> bo
                  host or host:port.",
             );
             row(ui, "Realm", |ui| {
-                ui.add(egui::TextEdit::singleline(&mut f.realm_name).hint_text("pick automatically after login").desired_width(320.0));
+                ui.add(egui::TextEdit::singleline(&mut f.realm_name).hint_text("登录后自动选择").desired_width(320.0));
             });
-            row(ui, "Game data URL", |ui| {
+            row(ui, "游戏数据 URL", |ui| {
                 ui.add(egui::TextEdit::singleline(&mut f.data_url).hint_text("https://…/data/ (inilla-datahost)").desired_width(320.0));
             });
-            row(ui, "Notes", |ui| {
+            row(ui, "备注", |ui| {
                 ui.add(egui::TextEdit::multiline(&mut f.notes).desired_rows(2).desired_width(320.0));
             });
         });
@@ -351,7 +351,7 @@ fn server_form(ui: &mut egui::Ui, f: &mut ServerForm, inilla: &mut Inilla) -> bo
             ui.colored_label(egui::Color32::LIGHT_RED, e);
         }
         ui.horizontal(|ui| {
-            if ui.add(egui::Button::new(egui::RichText::new("Save").color(GOLD)).min_size(egui::vec2(100.0, 40.0))).clicked() {
+            if ui.add(egui::Button::new(egui::RichText::new("保存").color(GOLD)).min_size(egui::vec2(100.0, 40.0))).clicked() {
                 match f.build() {
                     Ok(p) => {
                         if let Some(existing) = f.editing.as_deref().and_then(|id| inilla.launcher.server_mut(id)) {
@@ -365,12 +365,12 @@ fn server_form(ui: &mut egui::Ui, f: &mut ServerForm, inilla: &mut Inilla) -> bo
                     Err(errs) => f.errors = errs,
                 }
             }
-            if ui.button("Cancel").clicked() {
+            if ui.button("取消").clicked() {
                 done = true;
             }
             if let Some(id) = f.editing.clone() {
                 ui.add_space(24.0);
-                if ui.button(egui::RichText::new("Delete server").color(egui::Color32::LIGHT_RED)).clicked() {
+                if ui.button(egui::RichText::new("删除服务器").color(egui::Color32::LIGHT_RED)).clicked() {
                     for account in inilla.launcher.remove_server(&id) {
                         inilla_platform::keychain::delete(&format!("account:{account}"));
                     }
@@ -391,30 +391,30 @@ fn account_form(
     let mut done = false;
     ui.label(
         egui::RichText::new(if f.editing.is_some() {
-            "Edit account"
+            "编辑账号"
         } else {
-            "Add account"
+            "添加账号"
         })
         .strong(),
     );
-    row(ui, "Account name", |ui| {
+    row(ui, "账号", |ui| {
         ui.add(egui::TextEdit::singleline(&mut f.username).desired_width(260.0));
     });
-    row(ui, "Password", |ui| {
+    row(ui, "密码", |ui| {
         ui.add(
             egui::TextEdit::singleline(&mut f.password)
                 .password(true)
-                .hint_text(if f.editing.is_some() { "unchanged" } else { "" })
+                .hint_text(if f.editing.is_some() { "不变" } else { "" })
                 .desired_width(260.0),
         );
     });
     ui.checkbox(
         &mut f.remember,
-        "Remember the password (kept in the iOS Keychain)",
+        "记住密码（保存在 iOS 钥匙串）",
     );
     ui.add_enabled(
         f.remember,
-        egui::Checkbox::new(&mut f.auto_login, "Log in automatically when iNilla starts"),
+        egui::Checkbox::new(&mut f.auto_login, "启动 iNilla 时自动登录"),
     );
     hint(
         ui,
@@ -426,7 +426,7 @@ fn account_form(
         if ui
             .add_enabled(
                 can_save,
-                egui::Button::new(egui::RichText::new("Save").color(GOLD))
+                egui::Button::new(egui::RichText::new("保存").color(GOLD))
                     .min_size(egui::vec2(100.0, 40.0)),
             )
             .clicked()
@@ -463,13 +463,13 @@ fn account_form(
             f.password.clear();
             done = true;
         }
-        if ui.button("Cancel").clicked() {
+        if ui.button("取消").clicked() {
             done = true;
         }
         if let Some(id) = f.editing.clone() {
             ui.add_space(24.0);
             if ui
-                .button(egui::RichText::new("Delete account").color(egui::Color32::LIGHT_RED))
+                .button(egui::RichText::new("删除账号").color(egui::Color32::LIGHT_RED))
                 .clicked()
             {
                 inilla_platform::keychain::delete(&format!("account:{id}"));
@@ -481,7 +481,7 @@ fn account_form(
     done
 }
 
-const NOT_SAVED: &str = "Password not saved: the Keychain refused it";
+const NOT_SAVED: &str = "密码未保存：钥匙串拒绝";
 
 /// Save a password in the Keychain. A LiveContainer set up without keychain access groups
 /// refuses; the account then asks for the password at every login, and the caller says so.

@@ -11,19 +11,19 @@ const SHOWN: usize = 1500;
 pub(super) fn show(ui: &mut egui::Ui, overlay: &mut Overlay) {
     let lines = inilla_core::logring::global().tail(SHOWN * 4);
     ui.horizontal(|ui| {
-        ui.label("Filter");
+        ui.label("筛选");
         ui.add(
             egui::TextEdit::singleline(&mut overlay.log_filter)
                 .hint_text("warn, error, net:, inilla:")
                 .desired_width(260.0),
         );
         ui.checkbox(&mut overlay.log_follow, "follow");
-        if ui.button("Copy").clicked() {
+        if ui.button("复制").clicked() {
             let text: String = filtered(&lines, &overlay.log_filter)
                 .map(|(_, l)| format!("{l}\n"))
                 .collect();
             inilla_platform::pasteboard::set(&text);
-            overlay.toast("Log copied");
+            overlay.toast("日志已复制");
         }
     });
     let shown: Vec<&(u64, String)> = filtered(&lines, &overlay.log_filter).collect();

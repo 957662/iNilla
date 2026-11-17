@@ -177,8 +177,19 @@ fn back_at_login(mut overlay: ResMut<Overlay>, data: Res<DataState>, mut seen: L
 /// face too: Ubuntu Light has no arrows, `□`, `△` or `◐`, and a missing glyph draws as a box.
 pub(crate) fn fonts() -> egui::FontDefinitions {
     let mut fonts = egui::FontDefinitions::default();
+    // 中文字体：内嵌 Noto Sans SC 子集，保证 egui 界面能显示中文。
+    fonts.font_data.insert(
+        "noto_sc".to_owned(),
+        std::sync::Arc::new(egui::FontData::from_static(include_bytes!(
+            "../../../assets/fonts/NotoSansSC-subset.ttf"
+        ))),
+    );
     if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
+        family.insert(0, "noto_sc".to_owned());
         family.push("Hack".to_owned());
+    }
+    if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
+        family.push("noto_sc".to_owned());
     }
     fonts
 }
@@ -279,22 +290,22 @@ fn header(
     ui.horizontal(|ui| {
         ui.heading(egui::RichText::new("iNilla").color(GOLD).strong());
         let title = match panel {
-            Panel::Setup => "Game data",
-            Panel::Launcher => "Servers & accounts",
-            Panel::Settings => "Settings",
-            Panel::Logs => "Session log",
-            Panel::Editor => "Edit HUD",
+            Panel::Setup => "游戏数据",
+            Panel::Launcher => "服务器与账号",
+            Panel::Settings => "设置",
+            Panel::Logs => "会话日志",
+            Panel::Editor => "编辑 HUD",
         };
         ui.label(egui::RichText::new(title).size(20.0));
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let can_close = panel != Panel::Setup || data_ready;
-            if can_close && ui.button("× Close").clicked() {
+            if can_close && ui.button("× 关闭").clicked() {
                 overlay.panel = None;
             }
-            if panel != Panel::Settings && ui.button("⚙ Settings").clicked() {
+            if panel != Panel::Settings && ui.button("⚙ 设置").clicked() {
                 overlay.panel = Some(Panel::Settings);
             }
-            if !in_world && panel != Panel::Launcher && data_ready && ui.button("Servers").clicked()
+            if !in_world && panel != Panel::Launcher && data_ready && ui.button("服务器").clicked()
             {
                 overlay.panel = Some(Panel::Launcher);
             }
@@ -333,9 +344,9 @@ pub(super) fn hint(ui: &mut egui::Ui, text: &str) {
 pub(super) fn relaunch_hint() -> &'static str {
     match inilla_platform::paths::host() {
         inilla_platform::paths::Host::LiveContainer => {
-            "Then open LiveContainer and run iNilla again (or its home-screen shortcut)."
+            "然后打开 LiveContainer 再次运行 iNilla（或它的桌面快捷方式）。"
         }
-        _ => "Then tap the iNilla icon on the home screen.",
+        _ => "然后点击桌面上的 iNilla 图标。",
     }
 }
 
